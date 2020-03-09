@@ -2,27 +2,35 @@ package com.backend.springboottemplate.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public class UserProfileDTO extends DataTransferObject {
-    private static final long serialVersionUID = 4208421230155691542L;
+    @NotEmpty(message = "Field firstName must not be null or empty!")
+    private String firstName;
 
-    @Null(message = "Field userUuid must be null!")
-    private UUID userUuid;
+    @NotEmpty(message = "Field lastName must not be null or empty!")
+    private String lastName;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @NotNull(message = "Field birthDate must not be null or empty!")
     private LocalDate birthDate;
 
-    public UUID getUserUuid() {
-        return userUuid;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setUserUuid(final UUID userUuid) {
-        this.userUuid = userUuid;
+    public void setFirstName(final String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(final String lastName) {
+        this.lastName = lastName;
     }
 
     public LocalDate getBirthDate() {

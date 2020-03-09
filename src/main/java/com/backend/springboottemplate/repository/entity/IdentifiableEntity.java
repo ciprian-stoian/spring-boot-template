@@ -12,8 +12,6 @@ import java.util.UUID;
 @MappedSuperclass
 @EntityListeners(IdentifiableEntityListener.class)
 public abstract class IdentifiableEntity implements Serializable {
-    private static final long serialVersionUID = -7214847427196487668L;
-
     @Id
     @GeneratedValue(generator = "id_generator")
     private Long id;

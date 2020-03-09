@@ -3,6 +3,7 @@ package com.backend.springboottemplate.service;
 import com.backend.springboottemplate.repository.UserProfileRepository;
 import com.backend.springboottemplate.repository.entity.UserProfileEntity;
 import com.backend.springboottemplate.service.dto.UserProfileDTO;
+import com.backend.springboottemplate.util.AuthenticatedUserEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,47 +11,67 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.util.UUID;
 
 @Service
 public class UserProfileService implements BaseService<UserProfileDTO, UserProfileEntity> {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
+    @Autowired
+    private AuthenticatedUserEntity authenticatedUserEntity;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     @Transactional
     public UserProfileDTO addUserProfile(final UserProfileDTO userProfileDTO) {
-        validate(userProfileDTO);
+        long userId = authenticatedUserEntity.getAuthenticatedUser().getId();
 
-        return toDTO(userProfileRepository.save(toEntity(userProfileDTO)));
+        validateAddUserProfile(userId);
+
+        UserProfileEntity userProfileEntity = toEntity(userProfileDTO);
+        userProfileEntity.setUserId(userId);
+
+        return toDTO(userProfileRepository.save(userProfileEntity));
     }
 
     @Transactional
     public UserProfileDTO updateUserProfile(final UserProfileDTO userProfileDTO) {
-        return toDTO(userProfileRepository.save(toEntity(userProfileDTO, userProfileDTO.getUserUuid())));
+        UserProfileEntity existingEntity = validateUpdateUserProfile();
+
+        UserProfileEntity userProfileEntity = modelMapper.map(userProfileDTO, UserProfileEntity.class);
+        userProfileEntity.setUuid(existingEntity.getUuid());
+        userProfileEntity.setId(existingEntity.getId());
+        userProfileEntity.setUserId(existingEntity.getUserId());
+
+        return toDTO(userProfileRepository.save(userProfileEntity));
     }
 
     @Transactional
-    public UserProfileDTO getUserProfile(final UUID userUuid) {
-        UserProfileEntity userProfileEntity = userProfileRepository.findByUserUuid(userUuid);
-        validate(userProfileEntity);
+    public UserProfileDTO getUserProfile() {
+        UserProfileEntity userProfileEntity = userProfileRepository.findByUserId(authenticatedUserEntity.getAuthenticatedUser().getId());
 
-        return toDTO(userProfileRepository.findByUserUuid(userUuid));
-    }
-
-    private void validate(final UserProfileEntity userProfileEntity) {
         if (userProfileEntity == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else {
+            return toDTO(userProfileEntity);
         }
     }
 
-    @Override
-    public void validate(final UserProfileDTO userProfileDTO) {
-        UserProfileEntity userProfileEntity = userProfileRepository.findByUserUuid(userProfileDTO.getUserUuid());
+    private void validateAddUserProfile(final long userId) {
+        UserProfileEntity userProfileEntity = userProfileRepository.findByUserId(userId);
 
         if (userProfileEntity != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Duplicate Entity found in the database!");
+        }
+    }
+
+    private UserProfileEntity validateUpdateUserProfile() {
+        UserProfileEntity existingEntity = userProfileRepository.findByUserId(authenticatedUserEntity.getAuthenticatedUser().getId());
+
+        if (existingEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else {
+            return existingEntity;
         }
     }
 
@@ -62,19 +83,5 @@ public class UserProfileService implements BaseService<UserProfileDTO, UserProfi
     @Override
     public UserProfileEntity toEntity(final UserProfileDTO userProfileDTO) {
         return modelMapper.map(userProfileDTO, UserProfileEntity.class);
-    }
-
-    @Override
-    public UserProfileEntity toEntity(final UserProfileDTO userProfileDTO, final UUID uuid) {
-        UserProfileEntity userProfileEntity = modelMapper.map(userProfileDTO, UserProfileEntity.class);
-        UserProfileEntity existingEntity = userProfileRepository.findByUserUuid(uuid);
-
-        if (existingEntity != null) {
-            userProfileEntity.setId(existingEntity.getId());
-
-            return userProfileEntity;
-        }
-
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

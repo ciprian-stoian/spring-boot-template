@@ -7,13 +7,15 @@ import java.util.UUID;
 
 public class UserProfileDTOBuilder {
     private UUID uuid;
-    private UUID userUuid;
+    private String firstName;
+    private String lastName;
     private LocalDate birthDate;
 
     public UserProfileDTO build() {
         UserProfileDTO userProfileDTO = new UserProfileDTO();
         userProfileDTO.setUuid(uuid);
-        userProfileDTO.setUserUuid(userUuid);
+        userProfileDTO.setFirstName(firstName);
+        userProfileDTO.setLastName(lastName);
         userProfileDTO.setBirthDate(birthDate);
 
         return userProfileDTO;
@@ -22,7 +24,8 @@ public class UserProfileDTOBuilder {
     public UserProfileDTO buildDefault() {
         return new UserProfileDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .userUuid(UUID.randomUUID())
+                .firstName("First")
+                .lastName("Last")
                 .birthDate(LocalDate.now())
                 .build();
     }
@@ -32,8 +35,13 @@ public class UserProfileDTOBuilder {
         return this;
     }
 
-    public UserProfileDTOBuilder userUuid(UUID userUuid) {
-        this.userUuid = userUuid;
+    public UserProfileDTOBuilder firstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public UserProfileDTOBuilder lastName(String lastName) {
+        this.lastName = lastName;
         return this;
     }
 

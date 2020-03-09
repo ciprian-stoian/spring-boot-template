@@ -4,8 +4,6 @@ CREATE TABLE "users"
 (
     "id"         INT     NOT NULL,
     "uuid"       UUID    NOT NULL,
-    "first_name" VARCHAR NOT NULL,
-    "last_name"  VARCHAR NOT NULL,
     "username"   VARCHAR NOT NULL,
     "password"   VARCHAR NULL,
     "active"     BOOLEAN NOT NULL,
@@ -20,12 +18,14 @@ CREATE TABLE "users"
 CREATE SEQUENCE "user_profiles_id_seq" INCREMENT BY 1 START WITH 1 CACHE 1;
 CREATE TABLE "user_profiles"
 (
-    "id"         INT  NOT NULL,
-    "uuid"       UUID NOT NULL,
-    "user_uuid"  UUID NOT NULL,
-    "birth_date" DATE NOT NULL,
+    "id"         INT     NOT NULL,
+    "uuid"       UUID    NOT NULL,
+    "user_id"    INT     NOT NULL,
+    "first_name" VARCHAR NOT NULL,
+    "last_name"  VARCHAR NOT NULL,
+    "birth_date" DATE    NOT NULL,
     CONSTRAINT "user_profiles_pk" PRIMARY KEY ("id"),
     CONSTRAINT "user_profiles_uuid_uk" UNIQUE ("uuid"),
-    CONSTRAINT "user_profiles_user_uuid_uk" UNIQUE ("user_uuid"),
-    CONSTRAINT "user_profiles__users_fk" FOREIGN KEY ("user_uuid") REFERENCES "users" ("uuid")
+    CONSTRAINT "user_profiles_user_uuid_uk" UNIQUE ("user_id"),
+    CONSTRAINT "user_profiles__users_fk" FOREIGN KEY ("user_id") REFERENCES "users" ("id")
 );

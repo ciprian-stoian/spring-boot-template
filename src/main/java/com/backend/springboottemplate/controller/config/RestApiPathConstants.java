@@ -7,8 +7,8 @@ public interface RestApiPathConstants {
 
     interface AuthenticationController {
         String AUTHENTICATION_RELATIVE_PATH = "/authentication";
-        String SIGN_UP_RELATIVE_PATH = "/sign-up";
-        String SIGN_IN_RELATIVE_PATH = "/sign-in";
+        String REGISTER_RELATIVE_PATH = "/register";
+        String LOGIN_RELATIVE_PATH = "/login";
 
         String AUTHENTICATION_PATH = API_BASE_PATH + AUTHENTICATION_RELATIVE_PATH;
     }

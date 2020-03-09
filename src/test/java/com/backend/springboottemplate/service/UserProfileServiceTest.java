@@ -7,11 +7,15 @@ import com.backend.springboottemplate.repository.UserProfileRepository;
 import com.backend.springboottemplate.repository.UserRepository;
 import com.backend.springboottemplate.service.dto.UserDTO;
 import com.backend.springboottemplate.service.dto.UserProfileDTO;
+import com.backend.springboottemplate.util.AuthenticationMocker;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -23,15 +27,13 @@ public class UserProfileServiceTest extends BaseTest {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private UserProfileService userProfileService;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserProfileRepository userProfileRepository;
 
-    private UserDTO defaultUser;
+    @Autowired
+    private UserProfileService userProfileService = new UserProfileService();
 
     private UserProfileDTO defaultUserProfile;
 
@@ -39,18 +41,18 @@ public class UserProfileServiceTest extends BaseTest {
     public void before() {
         UserDTO userDTO = new UserDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .firstName("First Name")
-                .lastName("Last Name")
                 .username("username@default.com")
                 .password("password")
                 .active(true)
                 .build();
 
-        defaultUser = authenticationService.addUser(userDTO);
+        UserDTO defaultUser = authenticationService.addUser(userDTO);
+        AuthenticationMocker.mockAuthentication(userRepository.findByUuid(defaultUser.getUuid()));
 
         UserProfileDTO userProfileDTO = new UserProfileDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .userUuid(userDTO.getUuid())
+                .firstName("First Name")
+                .lastName("Last Name")
                 .birthDate(LocalDate.now())
                 .build();
 
@@ -60,54 +62,89 @@ public class UserProfileServiceTest extends BaseTest {
     @Test
     public void testAddUserProfile() {
         UserDTO addedUserDTO = authenticationService.addUser(new UserDTOBuilder().buildDefault());
+        AuthenticationMocker.mockAuthentication(userRepository.findByUuid(addedUserDTO.getUuid()));
 
         UserProfileDTO userProfileDTO = new UserProfileDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .userUuid(addedUserDTO.getUuid())
+                .firstName("Add First")
+                .lastName("Add Last")
                 .birthDate(LocalDate.now())
                 .build();
 
         UserProfileDTO addedDTO = userProfileService.addUserProfile(userProfileDTO);
 
         assertEquals(userProfileDTO.getUuid(), addedDTO.getUuid());
-        assertEquals(userProfileDTO.getUserUuid(), addedDTO.getUserUuid());
         assertEquals(userProfileDTO.getBirthDate(), addedDTO.getBirthDate());
-    }
-
-    public void testAddUserProfileWithoutUserUuid() {
-        UserProfileDTO userProfileDTO = new UserProfileDTOBuilder().buildDefault();
-        userProfileDTO.setUserUuid(null);
-
-        userProfileService.addUserProfile(userProfileDTO);
     }
 
     @Test(expected = DataIntegrityViolationException.class)
     public void testAddUserProfileWithoutBirthDate() {
+        UserDTO addedUserDTO = authenticationService.addUser(new UserDTOBuilder().buildDefault());
+        AuthenticationMocker.mockAuthentication(userRepository.findByUuid(addedUserDTO.getUuid()));
+
         UserProfileDTO userProfileDTO = new UserProfileDTOBuilder().buildDefault();
         userProfileDTO.setBirthDate(null);
 
         userProfileService.addUserProfile(userProfileDTO);
     }
 
+    @Test(expected = DataIntegrityViolationException.class)
+    public void testAddUserProfileWithoutFirstName() {
+        UserDTO addedUserDTO = authenticationService.addUser(new UserDTOBuilder().buildDefault());
+        AuthenticationMocker.mockAuthentication(userRepository.findByUuid(addedUserDTO.getUuid()));
+
+        UserProfileDTO userProfileDTO = new UserProfileDTOBuilder().buildDefault();
+        userProfileDTO.setFirstName(null);
+
+        userProfileService.addUserProfile(userProfileDTO);
+    }
+
+    @Test(expected = DataIntegrityViolationException.class)
+    public void testAddUserProfileWithoutLastName() {
+        UserDTO addedUserDTO = authenticationService.addUser(new UserDTOBuilder().buildDefault());
+        AuthenticationMocker.mockAuthentication(userRepository.findByUuid(addedUserDTO.getUuid()));
+
+        UserProfileDTO userProfileDTO = new UserProfileDTOBuilder().buildDefault();
+        userProfileDTO.setLastName(null);
+
+        userProfileService.addUserProfile(userProfileDTO);
+    }
+
+    @Test
     public void testAddDuplicateUserProfile() {
-        userProfileService.addUserProfile(defaultUserProfile);
+        ResponseStatusException exception = Assertions.assertThrows(ResponseStatusException.class, () -> userProfileService.addUserProfile(defaultUserProfile));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
     }
 
     @Test
     public void testUpdateUserProfile() {
+        defaultUserProfile.setFirstName("RayzaN");
+        defaultUserProfile.setLastName("The First");
         defaultUserProfile.setBirthDate(LocalDate.now());
 
         UserProfileDTO updatedDTO = userProfileService.updateUserProfile(defaultUserProfile);
         assertEquals(defaultUserProfile.getUuid(), updatedDTO.getUuid());
+        assertEquals(defaultUserProfile.getFirstName(), updatedDTO.getFirstName());
+        assertEquals(defaultUserProfile.getLastName(), updatedDTO.getLastName());
         assertEquals(defaultUserProfile.getBirthDate(), updatedDTO.getBirthDate());
     }
 
-    public void testUpdateUserProfileWithoutUserUuid() {
-        defaultUserProfile.setUserUuid(null);
+    @Test(expected = DataIntegrityViolationException.class)
+    public void testUpdateUserProfileWithoutFirstName() {
+        defaultUserProfile.setFirstName(null);
 
         userProfileService.updateUserProfile(defaultUserProfile);
     }
 
+    @Test(expected = DataIntegrityViolationException.class)
+    public void testUpdateUserProfileWithoutLastName() {
+        defaultUserProfile.setLastName(null);
+
+        userProfileService.updateUserProfile(defaultUserProfile);
+    }
+
+    @Test(expected = DataIntegrityViolationException.class)
     public void testUpdateUserProfileWithoutBirthDate() {
         defaultUserProfile.setBirthDate(null);
 
@@ -116,15 +153,10 @@ public class UserProfileServiceTest extends BaseTest {
 
     @Test
     public void testGetUserProfile() {
-        UserProfileDTO userProfileDTO = userProfileService.getUserProfile(defaultUser.getUuid());
+        UserProfileDTO userProfileDTO = userProfileService.getUserProfile();
 
         assertEquals(defaultUserProfile.getUuid(), userProfileDTO.getUuid());
-        assertEquals(defaultUserProfile.getUserUuid(), userProfileDTO.getUserUuid());
         assertEquals(defaultUserProfile.getBirthDate(), userProfileDTO.getBirthDate());
-    }
-
-    public void testGetUserProfileWithBadUserUuid() {
-        userProfileService.getUserProfile(UUID.randomUUID());
     }
 
     @After

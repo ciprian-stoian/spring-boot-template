@@ -6,8 +6,6 @@ import java.util.UUID;
 
 public class UserDTOBuilder {
     private UUID uuid;
-    private String firstName;
-    private String lastName;
     private String username;
     private String password;
     private boolean active;
@@ -15,8 +13,6 @@ public class UserDTOBuilder {
     public UserDTO build() {
         UserDTO userDTO = new UserDTO();
         userDTO.setUuid(uuid);
-        userDTO.setFirstName(firstName);
-        userDTO.setLastName(lastName);
         userDTO.setUsername(username);
         userDTO.setPassword(password);
         userDTO.setActive(active);
@@ -27,8 +23,6 @@ public class UserDTOBuilder {
     public UserDTO buildDefault() {
         return new UserDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .firstName("First")
-                .lastName("Last")
                 .username("user@name.com")
                 .password("password")
                 .active(true)
@@ -37,16 +31,6 @@ public class UserDTOBuilder {
 
     public UserDTOBuilder uuid(UUID uuid) {
         this.uuid = uuid;
-        return this;
-    }
-
-    public UserDTOBuilder firstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public UserDTOBuilder lastName(String lastName) {
-        this.lastName = lastName;
         return this;
     }
 

@@ -2,14 +2,13 @@ package com.backend.springboottemplate.service;
 
 import com.backend.springboottemplate.repository.UserRepository;
 import com.backend.springboottemplate.repository.entity.UserEntity;
-import com.backend.springboottemplate.service.dto.CredentialsDTO;
 import com.backend.springboottemplate.service.dto.UserDTO;
+import com.backend.springboottemplate.util.AuthenticatedUser;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.UUID;
 
 @Service
 public class AuthenticationService implements BaseService<UserDTO, UserEntity>, UserDetailsService {
@@ -36,7 +34,7 @@ public class AuthenticationService implements BaseService<UserDTO, UserEntity>, 
 
     @Transactional
     public UserDTO addUser(final UserDTO userDTO) {
-        validate(userDTO);
+        validateAddUser(userDTO);
 
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userDTO.setActive(true);
@@ -51,16 +49,16 @@ public class AuthenticationService implements BaseService<UserDTO, UserEntity>, 
     @Transactional
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByUsernameAndActiveTrue(username);
-        validate(userEntity);
+        validateAddUser(userEntity);
 
-        return new User(String.valueOf(userEntity.getUuid()), userEntity.getPassword(), new ArrayList<>());
+        return new AuthenticatedUser(String.valueOf(userEntity.getUuid()), userEntity.getPassword(), new ArrayList<>(), userEntity);
     }
 
-    public UserDTO getUser(final CredentialsDTO credentialsDTO) {
-        UserEntity userEntity = userRepository.findByUsernameAndActiveTrue(credentialsDTO.getUsername());
-        validate(userEntity);
+    public UserDTO getUser(final UserDTO userDTO) {
+        UserEntity userEntity = userRepository.findByUsernameAndActiveTrue(userDTO.getUsername());
+        validateAddUser(userEntity);
 
-        if (!this.passwordEncoder.matches(credentialsDTO.getPassword(), userEntity.getPassword())) {
+        if (!this.passwordEncoder.matches(userDTO.getPassword(), userEntity.getPassword())) {
             throw new BadCredentialsException("Invalid username or password!");
         }
 
@@ -69,14 +67,13 @@ public class AuthenticationService implements BaseService<UserDTO, UserEntity>, 
         return toDTO(userEntity);
     }
 
-    private void validate(final UserEntity userEntity) throws UsernameNotFoundException {
+    private void validateAddUser(final UserEntity userEntity) throws UsernameNotFoundException {
         if (userEntity == null) {
             throw new UsernameNotFoundException("Username was not found!");
         }
     }
 
-    @Override
-    public void validate(final UserDTO userDTO) {
+    private void validateAddUser(final UserDTO userDTO) {
         if (!EmailValidator.getInstance().isValid(userDTO.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please provide a valid email!");
         }
@@ -102,10 +99,5 @@ public class AuthenticationService implements BaseService<UserDTO, UserEntity>, 
         userEntity.setUpdatedOn(null);
 
         return userEntity;
-    }
-
-    @Override
-    public UserEntity toEntity(final UserDTO userDTO, final UUID uuid) {
-        return null;
     }
 }

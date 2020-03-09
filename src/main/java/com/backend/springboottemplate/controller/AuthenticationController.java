@@ -2,7 +2,6 @@ package com.backend.springboottemplate.controller;
 
 import com.backend.springboottemplate.controller.config.RestApiPathConstants;
 import com.backend.springboottemplate.service.AuthenticationService;
-import com.backend.springboottemplate.service.dto.CredentialsDTO;
 import com.backend.springboottemplate.service.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,15 +19,15 @@ public class AuthenticationController implements RestApiPathConstants.Authentica
     private AuthenticationService authenticationService;
 
     @ResponseBody
-    @RequestMapping(method = RequestMethod.POST, path = SIGN_UP_RELATIVE_PATH)
+    @RequestMapping(method = RequestMethod.POST, path = REGISTER_RELATIVE_PATH)
     public UserDTO addUser(@RequestBody @Valid final UserDTO userDTO) {
         return authenticationService.addUser(userDTO);
     }
 
     @ResponseBody
-    @RequestMapping(method = RequestMethod.POST, path = SIGN_IN_RELATIVE_PATH)
+    @RequestMapping(method = RequestMethod.POST, path = LOGIN_RELATIVE_PATH)
     public UserDTO getUser(
-            @RequestBody @Valid final CredentialsDTO credentialsDTO) {
-        return authenticationService.getUser(credentialsDTO);
+            @RequestBody @Valid final UserDTO userDTO) {
+        return authenticationService.getUser(userDTO);
     }
 }

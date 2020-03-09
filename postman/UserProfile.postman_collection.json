@@ -18,7 +18,7 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic Y2lwcmlhbi5pb2FuLnN0b2lhbkBnbWFpbC5jb206YWFhYWFh",
+						"value": "Basic Y2lwcmlhbkBnbWFpbC5jb206MTIzNDU2",
 						"type": "text"
 					}
 				],
@@ -55,7 +55,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"birthDate\": \"1992-06-08\"\n}",
+					"raw": "{\n\t\"firstName\": \"Ciprian\",\n\t\"lastName\": \"Stoian\",\n\t\"birthDate\": \"1992-06-08\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -89,13 +89,13 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Basic Y2lwcmlhbi5pb2FuLnN0b2lhbkBnbWFpbC5jb206YWFhYWFh",
+						"value": "Basic Y2lwcmlhbkBnbWFpbC5jb206MTIzNDU2",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\t\"uuid\": \"5e644531-0f47-4a5b-b1c5-954d6c3f44e5\",\r\n    \"birthDate\": \"1992-06-08\"\r\n}",
+					"raw": "{\r\n    \"uuid\": \"03fcf37c-f363-4b0b-a0cd-d8bf8ed66d2a\",\r\n    \"firstName\": \"Ciprian-Ioan\",\r\n    \"lastName\": \"Stoian\",\r\n    \"birthDate\": \"1992-06-08\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

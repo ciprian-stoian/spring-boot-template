@@ -1,17 +1,14 @@
 package com.backend.springboottemplate.service;
 
 import com.backend.springboottemplate.BaseTest;
-import com.backend.springboottemplate.builder.CredentialsDTOBuilder;
 import com.backend.springboottemplate.builder.UserDTOBuilder;
 import com.backend.springboottemplate.repository.UserRepository;
-import com.backend.springboottemplate.service.dto.CredentialsDTO;
 import com.backend.springboottemplate.service.dto.UserDTO;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,8 +36,6 @@ public class AuthenticationServiceTest extends BaseTest {
     public void before() {
         UserDTO userDTO = new UserDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .firstName("First Name")
-                .lastName("Last Name")
                 .username("username@default.com")
                 .password("password")
                 .active(true)
@@ -53,8 +48,6 @@ public class AuthenticationServiceTest extends BaseTest {
     public void testAddUser() {
         UserDTO userDTO = new UserDTOBuilder()
                 .uuid(UUID.randomUUID())
-                .firstName("Add First")
-                .lastName("Add Last")
                 .username("add@user.com")
                 .password("Add password")
                 .active(true)
@@ -63,29 +56,11 @@ public class AuthenticationServiceTest extends BaseTest {
         UserDTO addedDTO = authenticationService.addUser(userDTO);
 
         assertEquals(userDTO.getUuid(), addedDTO.getUuid());
-        assertEquals(userDTO.getFirstName(), addedDTO.getFirstName());
-        assertEquals(userDTO.getLastName(), addedDTO.getLastName());
         assertEquals(userDTO.getUsername(), addedDTO.getUsername());
         assertNull(addedDTO.getPassword());
         assertTrue(addedDTO.getActive());
         assertNotNull(addedDTO.getCreatedOn());
         assertNull(addedDTO.getUpdatedOn());
-    }
-
-    @Test(expected = DataIntegrityViolationException.class)
-    public void testAddUserWithoutFirstName() {
-        UserDTO userDTO = new UserDTOBuilder().buildDefault();
-        userDTO.setFirstName(null);
-
-        authenticationService.addUser(userDTO);
-    }
-
-    @Test(expected = DataIntegrityViolationException.class)
-    public void testAddUserWithoutLastName() {
-        UserDTO userDTO = new UserDTOBuilder().buildDefault();
-        userDTO.setLastName(null);
-
-        authenticationService.addUser(userDTO);
     }
 
     @Test
@@ -99,7 +74,7 @@ public class AuthenticationServiceTest extends BaseTest {
     }
 
     @Test
-    public void testAddUserWithoutBadUsername() {
+    public void testAddUserWithBadUsername() {
         UserDTO userDTO = new UserDTOBuilder().buildDefault();
         userDTO.setUsername("1");
 
@@ -166,41 +141,39 @@ public class AuthenticationServiceTest extends BaseTest {
 
     @Test
     public void testGetUser() {
-        CredentialsDTO credentialsDTO = new CredentialsDTOBuilder()
+        UserDTO userDTO = new UserDTOBuilder()
                 .username("username@default.com")
                 .password("password")
                 .build();
 
-        UserDTO userDTO = authenticationService.getUser(credentialsDTO);
+        UserDTO loadedUserDTO = authenticationService.getUser(userDTO);
 
-        assertEquals(defaultUser.getUuid(), userDTO.getUuid());
-        assertEquals(defaultUser.getFirstName(), userDTO.getFirstName());
-        assertEquals(defaultUser.getLastName(), userDTO.getLastName());
-        assertEquals(defaultUser.getUsername(), userDTO.getUsername());
-        assertNull(userDTO.getPassword());
-        assertTrue(userDTO.getActive());
-        assertNotNull(userDTO.getCreatedOn());
-        assertNull(userDTO.getUpdatedOn());
+        assertEquals(defaultUser.getUuid(), loadedUserDTO.getUuid());
+        assertEquals(defaultUser.getUsername(), loadedUserDTO.getUsername());
+        assertNull(loadedUserDTO.getPassword());
+        assertTrue(loadedUserDTO.getActive());
+        assertNotNull(loadedUserDTO.getCreatedOn());
+        assertNull(loadedUserDTO.getUpdatedOn());
     }
 
     @Test(expected = UsernameNotFoundException.class)
     public void testGetUserWithBadUsername() {
-        CredentialsDTO credentialsDTO = new CredentialsDTOBuilder()
+        UserDTO userDTO = new UserDTOBuilder()
                 .username("bad_username@default.com")
                 .password("password")
                 .build();
 
-        authenticationService.getUser(credentialsDTO);
+        authenticationService.getUser(userDTO);
     }
 
     @Test(expected = BadCredentialsException.class)
     public void testGetUserWithBadPassword() {
-        CredentialsDTO credentialsDTO = new CredentialsDTOBuilder()
+        UserDTO userDTO = new UserDTOBuilder()
                 .username("username@default.com")
                 .password("bad_password")
                 .build();
 
-        authenticationService.getUser(credentialsDTO);
+        authenticationService.getUser(userDTO);
     }
 
     @After

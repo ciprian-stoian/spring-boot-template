@@ -13,15 +13,15 @@ import java.util.Arrays;
 
 import static com.backend.springboottemplate.controller.config.RestApiPathConstants.API_BASE_PATH;
 import static com.backend.springboottemplate.controller.config.RestApiPathConstants.AuthenticationController.AUTHENTICATION_PATH;
-import static com.backend.springboottemplate.controller.config.RestApiPathConstants.AuthenticationController.SIGN_IN_RELATIVE_PATH;
-import static com.backend.springboottemplate.controller.config.RestApiPathConstants.AuthenticationController.SIGN_UP_RELATIVE_PATH;
+import static com.backend.springboottemplate.controller.config.RestApiPathConstants.AuthenticationController.LOGIN_RELATIVE_PATH;
+import static com.backend.springboottemplate.controller.config.RestApiPathConstants.AuthenticationController.REGISTER_RELATIVE_PATH;
 
 @Configuration
 @Order(0)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String[] NO_AUTHENTICATION_REQUIRED_PATHS = {
-            AUTHENTICATION_PATH + SIGN_UP_RELATIVE_PATH,
-            AUTHENTICATION_PATH + SIGN_IN_RELATIVE_PATH
+            AUTHENTICATION_PATH + REGISTER_RELATIVE_PATH,
+            AUTHENTICATION_PATH + LOGIN_RELATIVE_PATH
     };
 
     @Override
