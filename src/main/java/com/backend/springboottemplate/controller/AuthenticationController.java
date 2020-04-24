@@ -20,13 +20,13 @@ public class AuthenticationController implements RestApiPathConstants.Authentica
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, path = REGISTER_RELATIVE_PATH)
-    public UserDTO addUser(@RequestBody @Valid final UserDTO userDTO) {
+    public UserDTO register(@RequestBody @Valid final UserDTO userDTO) {
         return authenticationService.addUser(userDTO);
     }
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, path = LOGIN_RELATIVE_PATH)
-    public UserDTO getUser(
+    public UserDTO login(
             @RequestBody @Valid final UserDTO userDTO) {
         return authenticationService.getUser(userDTO);
     }
